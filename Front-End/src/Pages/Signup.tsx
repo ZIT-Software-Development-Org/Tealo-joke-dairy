@@ -1,8 +1,21 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 const Signup = () => {
 
+  const [signupData, setSignupData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: ""
+  })
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setSignupData({...signupData, [name]: value });
+  }
+
   return (
+
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-gray-900">Sign Up</h2>
