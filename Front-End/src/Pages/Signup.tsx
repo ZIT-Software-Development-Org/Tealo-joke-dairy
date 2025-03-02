@@ -1,25 +1,53 @@
 import { useState } from 'react';
+import axios from 'axios';
 
 const Signup = () => {
-
   const [signupData, setSignupData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: ""
-  })
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
+
+  const [error, setError] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setSignupData({...signupData, [name]: value });
-  }
+    setSignupData({ ...signupData, [name]: value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Check if passwords match
+    if (signupData.password !== signupData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+  
+
+    try {
+      const response = await axios.post('http://localhost:4000/api/auth/signup', signupData);
+      console.log('Signup successful:', response.data);
+      setSignupData({
+        name: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+      })
+      setError('');
+    } catch (error) {
+      console.error('Signup failed:', error.response?.data || error.message);
+      setError(error.response?.data?.message || 'Signup failed. Please try again.');
+    }
+  };
 
   return (
-
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-gray-900">Sign Up</h2>
-        <form>
+        {error && <p className="text-red-500 mb-4">{error}</p>}
+        <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
               Name
@@ -28,6 +56,9 @@ const Signup = () => {
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               id="name"
               type="text"
+              name="name"
+              value={signupData.name}
+              onChange={handleChange}
               placeholder="Name"
               required
             />
@@ -40,6 +71,9 @@ const Signup = () => {
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               id="email"
               type="email"
+              name="email"
+              value={signupData.email}
+              onChange={handleChange}
               placeholder="Email"
               required
             />
@@ -52,6 +86,9 @@ const Signup = () => {
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               id="password"
               type="password"
+              name="password"
+              value={signupData.password}
+              onChange={handleChange}
               placeholder="Password"
               required
             />
@@ -64,6 +101,9 @@ const Signup = () => {
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               id="confirmPassword"
               type="password"
+              name="confirmPassword"
+              value={signupData.confirmPassword}
+              onChange={handleChange}
               placeholder="Confirm Password"
               required
             />
