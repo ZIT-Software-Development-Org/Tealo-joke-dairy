@@ -51,7 +51,7 @@ const Login = () => {
                 className="h-4 w-4 text-blue-500 focus:ring-blue-500 border-gray-300 rounded"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-              />
+              /> 
               <label htmlFor="rememberMe" className="ml-2 text-gray-700">
                 Remember Me
               </label>
