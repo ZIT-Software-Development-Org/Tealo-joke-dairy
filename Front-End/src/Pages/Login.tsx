@@ -1,26 +1,51 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+
+interface LoginResponse {
+  token: string;
+  user: {
+    id: string;
+    email: string;
+  };
+}
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false); // State for "Remember Me" checkbox
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [rememberMe, setRememberMe] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
+  const navigate = useNavigate();
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log("Email:", email);
-    console.log("Password:", password);
-    console.log("Remember Me:", rememberMe);
-    setEmail("");
-    setPassword("");
-    setRememberMe(false);
+
+    try {
+      const response = await axios.post<LoginResponse>(
+        "http://localhost:5000/api/auth/login",
+        { email, password }
+      );
+
+      if (response.status === 200) {
+        console.log("Login successful:", response.data);
+        navigate("/dashboard");
+      }
+    } catch (err) {
+      const errorMessage =
+        axios.isAxiosError(err) && err.response?.data?.message
+          ? err.response.data.message
+          : "Login failed. Please try again.";
+      setError(errorMessage);
+      console.error("Login error:", err);
+    }
   };
 
   return (
-    <div onSubmit={handleSubmit} className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-lg w-96">
         <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
-        <form className="space-y-4">
+        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-gray-700">Email</label>
             <input
