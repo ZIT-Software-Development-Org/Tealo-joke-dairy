@@ -12,12 +12,13 @@ export default defineConfig({
     port: 3000,
     host: true,
     strictPort: true,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:5000',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
-      },
-    },
+    // proxy: {
+    //   '/api': {
+    //     target: 'http://localhost:5000',
+    //     changeOrigin: true,
+    //     rewrite: (path) => path.replace(/^\/api/, ""), // Removes "/api" prefix
+    //    secure: false,
+    //   },
+    // },
   }
 })

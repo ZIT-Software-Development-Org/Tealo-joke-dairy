@@ -1,9 +1,16 @@
-import { useState } from "react";
+import { useState, ChangeEvent, FormEvent } from "react";
 import axios from "axios";
+
+interface FormData {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
 
 const Signup = () => {
   // State to manage form data
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
     password: "",
@@ -11,17 +18,24 @@ const Signup = () => {
   });
 
   // State to handle errors
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string>("");
+
+  // State to handle success message
+  const [successMessage, setSuccessMessage] = useState<string>("");
 
   // Handle input changes
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prevFormData) => ({ ...prevFormData, [name]: value }));
   };
 
   // Handle form submission
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // Clear previous messages
+    setError("");
+    setSuccessMessage("");
 
     // Check if passwords match
     if (formData.password !== formData.confirmPassword) {
@@ -31,8 +45,12 @@ const Signup = () => {
 
     try {
       // Send the form data to the backend
-      const response = await axios.post("/signup", formData);
-      console.log("Signup successful:", response.data);
+      const response = await axios.post("http://localhost:5000/api/auth/signup", formData);
+
+      // If successful, display a success message
+      if (response.status === 201) {
+        setSuccessMessage("Signup successful! You can now log in.");
+      }
 
       // Clear the form after successful submission
       setFormData({
@@ -41,12 +59,15 @@ const Signup = () => {
         password: "",
         confirmPassword: "",
       });
+    } catch (error: any) {
+      console.error("Signup failed:", error);
 
-      // Clear any previous errors
-      setError("");
-    } catch (error) {
-      console.error("Signup failed:", error.response?.data || error.message);
-      setError(error.response?.data?.message || "Signup failed. Please try again.");
+      // Display the error message from the backend or a generic message
+      if (error.response?.data?.message) {
+        setError(error.response.data.message);
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
     }
   };
 
@@ -54,7 +75,13 @@ const Signup = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-gray-900">Sign Up</h2>
+
+        {/* Display success message */}
+        {successMessage && <p className="text-green-500 mb-4">{successMessage}</p>}
+
+        {/* Display error message */}
         {error && <p className="text-red-500 mb-4">{error}</p>}
+
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
@@ -62,7 +89,6 @@ const Signup = () => {
             </label>
             <input
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="name"
               type="text"
               name="name"
               value={formData.name}
