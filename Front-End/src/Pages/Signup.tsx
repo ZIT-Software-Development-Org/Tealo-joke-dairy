@@ -1,44 +1,73 @@
-import { useState } from 'react';
-import axios from 'axios';
+import { useState, ChangeEvent, FormEvent } from "react";
+import axios from "axios";
+
+interface FormData {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
 
 const Signup = () => {
-  const [signupData, setSignupData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
+  // State to manage form data
+  const [formData, setFormData] = useState<FormData>({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
 
-  const [error, setError] = useState('');
+  // State to handle errors
+  const [error, setError] = useState<string>("");
 
-  const handleChange = (e) => {
+  // State to handle success message
+  const [successMessage, setSuccessMessage] = useState<string>("");
+
+  // Handle input changes
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setSignupData({ ...signupData, [name]: value });
+    setFormData((prevFormData) => ({ ...prevFormData, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
+  // Handle form submission
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    // Clear previous messages
+    setError("");
+    setSuccessMessage("");
+
     // Check if passwords match
-    if (signupData.password !== signupData.confirmPassword) {
-      setError('Passwords do not match');
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match");
       return;
     }
-  
 
     try {
-      const response = await axios.post('http://localhost:4000/api/auth/signup', signupData);
-      console.log('Signup successful:', response.data);
-      setSignupData({
-        name: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-      })
-      setError('');
-    } catch (error) {
-      console.error('Signup failed:', error.response?.data || error.message);
-      setError(error.response?.data?.message || 'Signup failed. Please try again.');
+      // Send the form data to the backend
+      const response = await axios.post("http://localhost:5000/api/auth/signup", formData);
+
+      // If successful, display a success message
+      if (response.status === 201) {
+        setSuccessMessage("Signup successful! You can now log in.");
+      }
+
+      // Clear the form after successful submission
+      setFormData({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      });
+    } catch (error: any) {
+      console.error("Signup failed:", error);
+
+      // Display the error message from the backend or a generic message
+      if (error.response?.data?.message) {
+        setError(error.response.data.message);
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
     }
   };
 
@@ -46,7 +75,13 @@ const Signup = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-gray-900">Sign Up</h2>
+
+        {/* Display success message */}
+        {successMessage && <p className="text-green-500 mb-4">{successMessage}</p>}
+
+        {/* Display error message */}
         {error && <p className="text-red-500 mb-4">{error}</p>}
+
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
@@ -54,10 +89,9 @@ const Signup = () => {
             </label>
             <input
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="name"
               type="text"
               name="name"
-              value={signupData.name}
+              value={formData.name}
               onChange={handleChange}
               placeholder="Name"
               required
@@ -72,7 +106,7 @@ const Signup = () => {
               id="email"
               type="email"
               name="email"
-              value={signupData.email}
+              value={formData.email}
               onChange={handleChange}
               placeholder="Email"
               required
@@ -87,7 +121,7 @@ const Signup = () => {
               id="password"
               type="password"
               name="password"
-              value={signupData.password}
+              value={formData.password}
               onChange={handleChange}
               placeholder="Password"
               required
@@ -102,7 +136,7 @@ const Signup = () => {
               id="confirmPassword"
               type="password"
               name="confirmPassword"
-              value={signupData.confirmPassword}
+              value={formData.confirmPassword}
               onChange={handleChange}
               placeholder="Confirm Password"
               required
