@@ -6,4 +6,4 @@ authRoutes.post("/signup", signUp);
 authRoutes.post("/login", login);
 
 
-export default authRoutes;
+export default authRoutes; 
