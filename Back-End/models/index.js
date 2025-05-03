@@ -1,35 +1,19 @@
-'use strict';
-import fs from 'fs';
-import path from 'path';
-import Sequelize from 'sequelize';
-import process from 'process';
-import basename from 'basename';
-import config from (__dirname + '/../config/config.json')[env];
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import sequelize from '../config/database.js';
+import UserModel from './User.js';
+import JokeModel from './Joke.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const db = {};
-const env = process.env.NODE_ENV || 'development';
 
-let sequelize;
-if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable], config);
-} else {
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
-}
+// Initialize models
+db.User = UserModel(sequelize);
+db.Joke = JokeModel(sequelize);
 
-fs
-  .readdirSync(__dirname)
-  .filter(file => {
-    return (
-      file.indexOf('.') !== 0 &&
-      file !== basename &&
-      file.slice(-3) === '.js' &&
-      file.indexOf('.test.js') === -1
-    );
-  })
-  .forEach(file => {
-    const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes);
-    db[model.name] = model;
-  });
-
+// Set up associations
 Object.keys(db).forEach(modelName => {
   if (db[modelName].associate) {
     db[modelName].associate(db);
@@ -37,6 +21,6 @@ Object.keys(db).forEach(modelName => {
 });
 
 db.sequelize = sequelize;
-db.Sequelize = Sequelize;
 
-module.exports = db;
+export default db;
+export const { User, Joke } = db;

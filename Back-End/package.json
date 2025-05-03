@@ -5,18 +5,22 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon Back-End/server.js",
-    "start": "node Back-End/server.js"
+    "dev": "nodemon server.js",
+    "start": "node server.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
+    "connect-pg-simple": "^10.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "express-session": "^1.18.1",
     "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
-    "pg": "^8.13.3",
-    "sequelize": "^6.37.6"
+    "multer": "^1.4.5-lts.2",
+    "pg": "^8.15.5",
+    "sequelize": "^6.37.7"
   },
   "devDependencies": {
     "nodemon": "^3.1.9",

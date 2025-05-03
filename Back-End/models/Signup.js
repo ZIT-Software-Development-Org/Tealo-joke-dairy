@@ -2,7 +2,7 @@ import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js'; // Ensure this exports a Sequelize instance
 
 const User = sequelize.define(
-  'User',
+  'user',
   {
     // Model attributes are defined here
     id: {
@@ -10,7 +10,7 @@ const User = sequelize.define(
       primaryKey: true,
       autoIncrement: true,
     },
-    name: {
+    username: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -28,9 +28,9 @@ const User = sequelize.define(
     },
   },
   {
-    tableName: "users", // Model tableName will be the same as the model name
+    tableName: "Users", // Model tableName will be the same as the model name
     timestamps: true, // Automatically adds `createdAt` and `updatedAt` fields
-    underscored: true, // Use snake_case for column names (optional)
+    underscored: false, // Use snake_case for column names (optional)
   }
 );
 
