@@ -37,6 +37,25 @@ const Signup = () => {
     setError("");
     setSuccessMessage("");
 
+    // Basic validation
+    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
+      setError("All fields are required");
+      return;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError("Please enter a valid email address");
+      return;
+    }
+
+    // Password validation
+    if (formData.password.length < 5) {
+      setError("Password must be at least 5 characters long");
+      return;
+    }
+
     // Check if passwords match
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
@@ -45,28 +64,35 @@ const Signup = () => {
 
     try {
       // Send the form data to the backend
-      const response = await axios.post("http://localhost:5000/api/auth/signup", formData);
+      const { data } = await axios.post("http://localhost:4000/api/auth/signup", {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        withCredentials: true
+      });
 
-      // If successful, display a success message
-      if (response.status === 201) {
-        setSuccessMessage("Signup successful! You can now log in.");
-      }
+      // If successful, display the success message from the backend
+      setSuccessMessage(data.message || "Signup successful! You can now log in.");
 
       // Clear the form after successful submission
       setFormData({
         name: "",
         email: "",
         password: "",
-        confirmPassword: "",
+        confirmPassword: ""
       });
-    } catch (error: any) {
-      console.error("Signup failed:", error);
-
-      // Display the error message from the backend or a generic message
-      if (error.response?.data?.message) {
-        setError(error.response.data.message);
+    } catch (err: any) {
+      console.error('Signup error:', err);
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else if (!err.response) {
+        setError('Network error. Please check your connection.');
       } else {
-        setError("Something went wrong. Please try again.");
+        setError('An unexpected error occurred. Please try again.');
       }
     }
   };

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useAuth } from "../context/AuthContext";
 
 interface LoginResponse {
   token: string;
@@ -16,26 +17,42 @@ const Login = () => {
   const [rememberMe, setRememberMe] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const navigate = useNavigate();
+  const { login } = useAuth(); // Move useAuth to component level
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     try {
       const response = await axios.post<LoginResponse>(
-        "http://localhost:5000/api/auth/login",
-        { email, password }
+        "http://localhost:4000/api/auth/login",
+        { email, password },
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true,
+          timeout: 5000 // 5 second timeout
+        }
       );
 
       if (response.status === 200) {
-        console.log("Login successful:", response.data);
+        const { token, user } = response.data;
+        // Update the authentication state
+        login({ token, user });
         navigate("/dashboard");
       }
     } catch (err) {
-      const errorMessage =
-        axios.isAxiosError(err) && err.response?.data?.message
-          ? err.response.data.message
-          : "Login failed. Please try again.";
-      setError(errorMessage);
+      if (axios.isAxiosError(err)) {
+        if (err.code === 'ERR_NETWORK') {
+          setError('Unable to connect to the server. Please check if the server is running.');
+        } else if (err.response) {
+          setError(err.response.data?.message || 'Login failed. Please check your credentials.');
+        } else if (err.request) {
+          setError('No response received from server. Please try again.');
+        }
+      } else {
+        setError('An unexpected error occurred. Please try again.');
+      }
       console.error("Login error:", err);
     }
   };
